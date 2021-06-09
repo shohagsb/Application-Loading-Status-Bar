@@ -2,7 +2,7 @@ package com.udacity
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.graphics.Canvas
+import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
 import kotlin.properties.Delegates
@@ -12,6 +12,15 @@ class LoadingButton @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
     private var widthSize = 0
     private var heightSize = 0
+    // position variable which will be used to draw label and indicator circle position
+    private val pointPosition: PointF = PointF(0.0f, 0.0f)
+
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+        textAlign = Paint.Align.CENTER
+        textSize = 55.0f
+        typeface = Typeface.create("", Typeface.BOLD)
+    }
 
     private val valueAnimator = ValueAnimator()
 
@@ -27,6 +36,10 @@ class LoadingButton @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
+        paint.color = Color.BLACK
+        val label = "Click Me"
+        canvas?.drawText(label, pointPosition.x, pointPosition.y, paint)
+        //canvas.drawRect()
 
     }
 

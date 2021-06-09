@@ -9,6 +9,9 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
+import android.view.View
+import android.widget.RadioButton
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
 import kotlinx.android.synthetic.main.activity_main.*
@@ -31,13 +34,19 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(receiver, IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE))
 
         custom_button.setOnClickListener {
-            download()
+            //onRadioButtonClicked(it)
+            if (URL != null) {
+                download()
+            } else {
+                Toast.makeText(this, "Please select the file to download", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
+
         }
     }
 
@@ -56,9 +65,35 @@ class MainActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val URL =
-            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+        private var URL: String? = null
+
         private const val CHANNEL_ID = "channelId"
+    }
+
+    fun onRadioButtonClicked(view: View) {
+        if (view is RadioButton) {
+            // Is the button now checked?
+            val checked = view.isChecked
+
+            // Check which radio button was clicked
+            when (view.getId()) {
+                R.id.radio_glide ->
+                    if (checked) {
+                        URL =
+                            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+                    }
+                R.id.radio_load_app ->
+                    if (checked) {
+                        URL =
+                            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+                    }
+                R.id.radio_retrofit ->
+                    if (checked) {
+                        URL =
+                            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+                    }
+            }
+        }
     }
 
 }

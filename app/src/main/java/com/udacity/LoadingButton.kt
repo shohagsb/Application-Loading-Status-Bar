@@ -12,20 +12,21 @@ class LoadingButton @JvmOverloads constructor(
 ) : View(context, attrs, defStyleAttr) {
     private var widthSize = 0
     private var heightSize = 0
-    // position variable which will be used to draw label and indicator circle position
-    private val pointPosition: PointF = PointF(0.0f, 0.0f)
 
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        style = Paint.Style.FILL
-        textAlign = Paint.Align.CENTER
-        textSize = 55.0f
-        typeface = Typeface.create("", Typeface.BOLD)
-    }
+    private val clipRectTop = resources.getDimension(R.dimen.clipRectTop)
+    private val clipRectLeft = resources.getDimension(R.dimen.clipRectLeft)
 
     private val valueAnimator = ValueAnimator()
 
     private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
 
+    }
+
+    private val paint = Paint().apply {
+        // Smooth out edges of what is drawn without affecting shape.
+        isAntiAlias = true
+        strokeWidth = resources.getDimension(R.dimen.strokeWidth)
+        textSize = resources.getDimension(R.dimen.textSize)
     }
 
 
@@ -34,13 +35,22 @@ class LoadingButton @JvmOverloads constructor(
     }
 
 
-    override fun onDraw(canvas: Canvas?) {
+    override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        paint.color = Color.BLACK
-        val label = "Click Me"
-        canvas?.drawText(label, pointPosition.x, pointPosition.y, paint)
-        //canvas.drawRect()
+        canvas.drawColor(resources.getColor(R.color.colorPrimary))
+        drawTranslatedTextExample(canvas)
 
+    }
+
+    private fun drawTranslatedTextExample(canvas: Canvas) {
+        canvas.save()
+        paint.color = Color.BLACK
+        // Align the RIGHT side of the text with the origin.
+        paint.textAlign = Paint.Align.CENTER
+        // Draw text.
+        canvas.drawText(context.getString(R.string.button_name),
+            clipRectLeft,clipRectTop,paint)
+        canvas.restore()
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

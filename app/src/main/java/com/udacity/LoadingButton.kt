@@ -4,7 +4,10 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.View
+import android.view.animation.AccelerateDecelerateInterpolator
+import androidx.core.content.ContextCompat
 import kotlin.properties.Delegates
 
 class LoadingButton @JvmOverloads constructor(
@@ -13,20 +16,20 @@ class LoadingButton @JvmOverloads constructor(
     private var widthSize = 0
     private var heightSize = 0
 
-    private val clipRectTop = resources.getDimension(R.dimen.clipRectTop)
-    private val clipRectLeft = resources.getDimension(R.dimen.clipRectLeft)
+    //private val valueAnimator = ValueAnimator()
+    private var valueAnimator:ValueAnimator? = null
 
-    private val valueAnimator = ValueAnimator()
 
-    private var buttonState: ButtonState by Delegates.observable<ButtonState>(ButtonState.Completed) { p, old, new ->
+    private var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { p, old, new ->
 
     }
 
-    private val paint = Paint().apply {
-        // Smooth out edges of what is drawn without affecting shape.
-        isAntiAlias = true
-        strokeWidth = resources.getDimension(R.dimen.strokeWidth)
-        textSize = resources.getDimension(R.dimen.textSize)
+    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+        textAlign = Paint.Align.CENTER
+        textSize = 55.0f
+        //typeface = Typeface.create( "", Typeface.BOLD)
+        textSize = resources.getDimension(R.dimen.default_text_size)
     }
 
 
@@ -34,23 +37,43 @@ class LoadingButton @JvmOverloads constructor(
 
     }
 
-
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawColor(resources.getColor(R.color.colorPrimary))
+        //canvas.drawColor(resources.getColor(R.color.colorPrimary))
         drawTranslatedTextExample(canvas)
 
     }
 
     private fun drawTranslatedTextExample(canvas: Canvas) {
         canvas.save()
-        paint.color = Color.BLACK
-        // Align the RIGHT side of the text with the origin.
-        paint.textAlign = Paint.Align.CENTER
+        paint.color = ContextCompat.getColor(context, R.color.colorPrimary)
+        canvas.drawRect(0f, 0f, widthSize.toFloat(), heightSize.toFloat(), paint)
+        paint.color = Color.WHITE
         // Draw text.
-        canvas.drawText(context.getString(R.string.button_name),
-            clipRectLeft,clipRectTop,paint)
+        canvas.drawText(
+            context.getString(R.string.button_name),
+            widthSize / 2f, heightSize / 2f + 18, paint
+        )
+
+        paint.color = ContextCompat.getColor(context, R.color.colorAccent)
+        canvas.drawCircle(widthSize / 1.4f, heightSize / 2f, 40f, paint)
         canvas.restore()
+    }
+
+    private var circleRadius = 40f
+    fun showLoading() {
+        //isVisible = true
+        valueAnimator = ValueAnimator.ofFloat(10F, circleRadius).apply {
+            duration = 1000
+            interpolator = AccelerateDecelerateInterpolator()
+            addUpdateListener { animation ->
+                circleRadius = animation.animatedValue as Float
+                animation.repeatCount = ValueAnimator.INFINITE
+                animation.repeatMode = ValueAnimator.REVERSE
+                invalidate()
+            }
+            start()
+        }
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

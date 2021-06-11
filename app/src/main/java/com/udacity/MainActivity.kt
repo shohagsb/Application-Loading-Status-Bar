@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity() {
         )
 
         custom_button.setOnClickListener {
+            custom_button.showLoading()
             if (URL != null) {
                 download()
             } else {

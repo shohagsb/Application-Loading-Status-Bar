@@ -16,8 +16,10 @@ class LoadingButton @JvmOverloads constructor(
     private var widthSize = 0
     private var heightSize = 0
 
+    private var circleRadius = 40f
+
     //private val valueAnimator = ValueAnimator()
-    private var valueAnimator:ValueAnimator? = null
+    private var valueAnimator: ValueAnimator? = null
 
 
     private var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { p, old, new ->
@@ -56,11 +58,11 @@ class LoadingButton @JvmOverloads constructor(
         )
 
         paint.color = ContextCompat.getColor(context, R.color.colorAccent)
-        canvas.drawCircle(widthSize / 1.4f, heightSize / 2f, 40f, paint)
+        canvas.drawCircle(widthSize / 1.4f, heightSize / 2f, circleRadius, paint)
         canvas.restore()
     }
 
-    private var circleRadius = 40f
+
     fun showLoading() {
         //isVisible = true
         valueAnimator = ValueAnimator.ofFloat(10F, circleRadius).apply {

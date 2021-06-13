@@ -18,15 +18,31 @@ class LoadingButton @JvmOverloads constructor(
     private var heightSize = 0
 
     private var circleRadius = 0f
-    private var buttonWidth = 0f;
+    private var buttonWidth = 0f
     val animDuration = 3000L
 
+    private var buttonText = context.getString(R.string.button_name)
+
     private var buttonValueAnimator = ValueAnimator()
-    private var circleValueAnimator: ValueAnimator? = null
+    private var circleValueAnimator = ValueAnimator()
 
 
     var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { p, old, new ->
-
+        when (new) {
+            ButtonState.Loading -> {
+                buttonText = context.getString(R.string.button_loading)
+                startAnimation()
+            }
+            ButtonState.Completed -> {
+                buttonText = context.getString(R.string.button_name)
+                cancelAnimation()
+                resetLoadingValue()
+            }
+            else -> {
+                buttonText = context.getString(R.string.button_name)
+            }
+        }
+        invalidate()
     }
 
     private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -38,22 +54,21 @@ class LoadingButton @JvmOverloads constructor(
 
 
     init {
-
+        isClickable = true
     }
+
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawColor(ContextCompat.getColor(context, R.color.colorPrimary))
         drawTranslatedTextExample(canvas)
 
     }
 
     private fun drawTranslatedTextExample(canvas: Canvas) {
         canvas.save()
-//        paint.color = ContextCompat.getColor(context, R.color.colorPrimary)
-//        canvas.drawRect(0f, 0f, widthSize.toFloat(), heightSize.toFloat(), paint)
-
-        //Draw the Animated Rectangle
+        //Button Background
+        canvas.drawColor(ContextCompat.getColor(context, R.color.colorPrimary))
+        //Draw the Rectangle
         paint.color = context.getColor(R.color.colorPrimaryDark)
         canvas.drawRect(
             0f,
@@ -63,17 +78,18 @@ class LoadingButton @JvmOverloads constructor(
             paint
         )
 
-        paint.color = Color.WHITE
         // Draw text.
+        paint.color = Color.WHITE
         canvas.drawText(
-            context.getString(R.string.button_name),
+            buttonText,
             widthSize / 2f, heightSize / 2f + 18, paint
         )
 
+        // Draw Circle
         paint.color = ContextCompat.getColor(context, R.color.colorAccent)
         canvas.drawArc(
-            widthSize - 345f, heightSize / 2 - 40f,
-            widthSize - 270f, heightSize / 2 + 40f,
+            widthSize - 245f, heightSize / 2 - 40f,
+            widthSize - 170f, heightSize / 2 + 40f,
             0f, circleRadius, true, paint
         )
 
@@ -85,7 +101,7 @@ class LoadingButton @JvmOverloads constructor(
         canvas.restore()
     }
 
-    fun showLoading() {
+    private fun startAnimation() {
         circleValueAnimator = ValueAnimator.ofFloat(0F, 360F).apply {
             duration = animDuration
             interpolator = AccelerateInterpolator(1f)
@@ -102,12 +118,22 @@ class LoadingButton @JvmOverloads constructor(
             interpolator = AccelerateInterpolator(1f)
             repeatCount = ValueAnimator.INFINITE
             repeatMode = ValueAnimator.RESTART
-            addUpdateListener {animation ->
+            addUpdateListener { animation ->
                 buttonWidth = animation.animatedValue as Float
                 invalidate()
             }
             start()
         }
+    }
+
+    private fun cancelAnimation() {
+        circleValueAnimator.cancel()
+        buttonValueAnimator.cancel()
+    }
+
+    private fun resetLoadingValue() {
+        circleRadius = 0f
+        buttonWidth = 0f
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {

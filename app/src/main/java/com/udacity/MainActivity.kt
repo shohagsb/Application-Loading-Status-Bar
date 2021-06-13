@@ -49,8 +49,8 @@ class MainActivity : AppCompatActivity() {
         )
 
         custom_button.setOnClickListener {
-            custom_button.showLoading()
             if (URL != null) {
+                custom_button.buttonState = ButtonState.Loading
                 download()
             } else {
                 Toast.makeText(this, "Please select the file to download", Toast.LENGTH_SHORT)
@@ -63,30 +63,18 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
             notificationManager.cancelAll()
+            custom_button.buttonState = ButtonState.Completed
             val query = DownloadManager.Query()
             query.setFilterById(id!!)
             val cursor = downloadManager.query(query)
             var downloadStatus: String? = null
             if (cursor.moveToFirst()) {
                 val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
-                val fileName =
-                    cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_DESCRIPTION))
+                cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_DESCRIPTION))
                 if (DownloadManager.STATUS_SUCCESSFUL == status) {
                     downloadStatus = "Success"
-                    //handle success & show notification
-                    Log.d(
-                        "MainActivityTag",
-                        "onReceive: Status: success\n file name: $fileName\n $URL"
-                    )
-
-                }
-                if (DownloadManager.STATUS_FAILED == status) {
-                    //handle failure & show failed notification
+                } else if (DownloadManager.STATUS_FAILED == status) {
                     downloadStatus = "Failed"
-                    Log.d(
-                        "MainActivityTag", "onReceive: Status: failed \n" +
-                                " file name: $fileName"
-                    )
                 }
             }
             downloadStatus?.let { status ->
@@ -96,7 +84,6 @@ class MainActivity : AppCompatActivity() {
                     status
                 )
             }
-
 
         }
     }

@@ -14,10 +14,14 @@ class DetailActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
         val fileName = intent.getStringExtra("file_name")
         val status = intent.getStringExtra("status")
+        if (fileName != null && status != null) {
+            file_name_text.text = fileName.toString()
+            status_text.text = status.toString()
+        }
 
-        Log.d("DetailTAG", "onCreate: file name: $fileName\n Status: $status")
-        file_name_text.text = fileName
-        status_text.text = status
+        ok_button.setOnClickListener {
+            finish()
+        }
     }
 
 }

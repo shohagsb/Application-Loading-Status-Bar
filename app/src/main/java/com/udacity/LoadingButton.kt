@@ -17,7 +17,7 @@ class LoadingButton @JvmOverloads constructor(
     private var widthSize = 0
     private var heightSize = 0
 
-    private var circleRadius = 360f
+    private var circleRadius = 0f
     private var buttonWidth = 0f;
     val animDuration = 3000L
 
@@ -25,7 +25,7 @@ class LoadingButton @JvmOverloads constructor(
     private var circleValueAnimator: ValueAnimator? = null
 
 
-    private var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { p, old, new ->
+    var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { p, old, new ->
 
     }
 
@@ -33,7 +33,6 @@ class LoadingButton @JvmOverloads constructor(
         style = Paint.Style.FILL
         textAlign = Paint.Align.CENTER
         textSize = 55.0f
-        //typeface = Typeface.create( "", Typeface.BOLD)
         textSize = resources.getDimension(R.dimen.default_text_size)
     }
 
@@ -44,15 +43,15 @@ class LoadingButton @JvmOverloads constructor(
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        //canvas.drawColor(resources.getColor(R.color.colorPrimary))
+        canvas.drawColor(ContextCompat.getColor(context, R.color.colorPrimary))
         drawTranslatedTextExample(canvas)
 
     }
 
     private fun drawTranslatedTextExample(canvas: Canvas) {
         canvas.save()
-        paint.color = ContextCompat.getColor(context, R.color.colorPrimary)
-        canvas.drawRect(0f, 0f, widthSize.toFloat(), heightSize.toFloat(), paint)
+//        paint.color = ContextCompat.getColor(context, R.color.colorPrimary)
+//        canvas.drawRect(0f, 0f, widthSize.toFloat(), heightSize.toFloat(), paint)
 
         //Draw the Animated Rectangle
         paint.color = context.getColor(R.color.colorPrimaryDark)
@@ -86,26 +85,9 @@ class LoadingButton @JvmOverloads constructor(
         canvas.restore()
     }
 
-//    circleAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
-//        val animDuration
-//        duration = animDuration
-//        repeatMode = ValueAnimator.REVERSE
-//        repeatCount = ValueAnimator.INFINITE
-//        interpolator = AccelerateInterpolator(1f)
-//        addUpdateListener {
-//            loadingAngle = animatedValue as Float
-//            invalidate()
-//        }
-//    }
-
-//    fun showLoading() {
-//
-//    }
-
     fun showLoading() {
-        circleValueAnimator = ValueAnimator.ofFloat(0F, circleRadius).apply {
+        circleValueAnimator = ValueAnimator.ofFloat(0F, 360F).apply {
             duration = animDuration
-            //interpolator = AccelerateDecelerateInterpolator()
             interpolator = AccelerateInterpolator(1f)
             repeatCount = ValueAnimator.INFINITE
             repeatMode = ValueAnimator.RESTART
@@ -120,8 +102,8 @@ class LoadingButton @JvmOverloads constructor(
             interpolator = AccelerateInterpolator(1f)
             repeatCount = ValueAnimator.INFINITE
             repeatMode = ValueAnimator.RESTART
-            addUpdateListener {
-                buttonWidth = animatedValue as Float
+            addUpdateListener {animation ->
+                buttonWidth = animation.animatedValue as Float
                 invalidate()
             }
             start()

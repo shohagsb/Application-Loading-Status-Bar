@@ -12,6 +12,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.RadioButton
 import android.widget.Toast
@@ -26,6 +27,7 @@ private const val NOTIFICATION_ID = 0
 class MainActivity : AppCompatActivity() {
 
     private var downloadID: Long = 0
+    private lateinit var downloadManager: DownloadManager
 
     private lateinit var notificationManager: NotificationManager
     private lateinit var pendingIntent: PendingIntent
@@ -61,10 +63,40 @@ class MainActivity : AppCompatActivity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             val id = intent?.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1)
             notificationManager.cancelAll()
-            notificationManager.sendNotification(
-                applicationContext.getString(R.string.notification_description),
-                applicationContext
-            )
+            val query = DownloadManager.Query()
+            query.setFilterById(id!!)
+            val cursor = downloadManager.query(query)
+            var downloadStatus: String? = null
+            if (cursor.moveToFirst()) {
+                val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
+                val fileName =
+                    cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_DESCRIPTION))
+                if (DownloadManager.STATUS_SUCCESSFUL == status) {
+                    downloadStatus = "Success"
+                    //handle success & show notification
+                    Log.d(
+                        "MainActivityTag",
+                        "onReceive: Status: success\n file name: $fileName\n $URL"
+                    )
+
+                }
+                if (DownloadManager.STATUS_FAILED == status) {
+                    //handle failure & show failed notification
+                    downloadStatus = "Failed"
+                    Log.d(
+                        "MainActivityTag", "onReceive: Status: failed \n" +
+                                " file name: $fileName"
+                    )
+                }
+            }
+            downloadStatus?.let { status ->
+                notificationManager.sendNotification(
+                    applicationContext.getString(R.string.notification_description),
+                    applicationContext,
+                    status
+                )
+            }
+
 
         }
     }
@@ -73,19 +105,19 @@ class MainActivity : AppCompatActivity() {
         val request =
             DownloadManager.Request(Uri.parse(URL))
                 .setTitle(getString(R.string.app_name))
-                .setDescription(getString(R.string.app_description))
+                .setDescription(fileName)
                 .setRequiresCharging(false)
                 .setAllowedOverMetered(true)
                 .setAllowedOverRoaming(true)
 
-        val downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
+        downloadManager = getSystemService(DOWNLOAD_SERVICE) as DownloadManager
         downloadID =
             downloadManager.enqueue(request)// enqueue puts the download request in the queue.
     }
 
     companion object {
         private var URL: String? = null
-
+        private var fileName: String? = null
         private const val CHANNEL_ID = "channelId"
     }
 
@@ -111,8 +143,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     //    Send notification extension function
-    fun NotificationManager.sendNotification(messageBody: String, applicationContext: Context) {
+    fun NotificationManager.sendNotification(
+        messageBody: String,
+        applicationContext: Context,
+        status: String
+    ) {
         val contentIntent = Intent(applicationContext, DetailActivity::class.java)
+        contentIntent.putExtra("file_name", fileName)
+        contentIntent.putExtra("status", status)
         pendingIntent = PendingIntent.getActivity(
             applicationContext,
             NOTIFICATION_ID,
@@ -140,9 +178,6 @@ class MainActivity : AppCompatActivity() {
         notify(NOTIFICATION_ID, builder.build())
     }
 
-    fun NotificationManager.cancelNotifications() {
-        cancelAll()
-    }
 
     fun onRadioButtonClicked(view: View) {
         if (view is RadioButton) {
@@ -154,17 +189,20 @@ class MainActivity : AppCompatActivity() {
                 R.id.radio_glide ->
                     if (checked) {
                         URL =
-                            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+                            "https://github.com/bumptech/glide/archive/refs/heads/master.zip"
+                        fileName = getString(R.string.glide_text)
                     }
                 R.id.radio_load_app ->
                     if (checked) {
                         URL =
                             "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+                        fileName = getString(R.string.load_app_text)
                     }
                 R.id.radio_retrofit ->
                     if (checked) {
                         URL =
-                            "https://github.com/udacity/nd940-c3-advanced-android-programming-project-starter/archive/master.zip"
+                            "https://github.com/square/retrofit/archive/refs/heads/master.zip"
+                        fileName = getString(R.string.retrofit_text)
                     }
             }
         }

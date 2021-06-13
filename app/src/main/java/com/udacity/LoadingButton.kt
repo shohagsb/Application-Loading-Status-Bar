@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.View
 import android.view.animation.AccelerateDecelerateInterpolator
+import android.view.animation.AccelerateInterpolator
 import androidx.core.content.ContextCompat
 import kotlin.properties.Delegates
 
@@ -16,10 +17,12 @@ class LoadingButton @JvmOverloads constructor(
     private var widthSize = 0
     private var heightSize = 0
 
-    private var circleRadius = 40f
+    private var circleRadius = 360f
+    private var buttonWidth = 0f;
+    val animDuration = 3000L
 
-    //private val valueAnimator = ValueAnimator()
-    private var valueAnimator: ValueAnimator? = null
+    private var buttonValueAnimator = ValueAnimator()
+    private var circleValueAnimator: ValueAnimator? = null
 
 
     private var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { p, old, new ->
@@ -50,6 +53,17 @@ class LoadingButton @JvmOverloads constructor(
         canvas.save()
         paint.color = ContextCompat.getColor(context, R.color.colorPrimary)
         canvas.drawRect(0f, 0f, widthSize.toFloat(), heightSize.toFloat(), paint)
+
+        //Draw the Animated Rectangle
+        paint.color = context.getColor(R.color.colorPrimaryDark)
+        canvas.drawRect(
+            0f,
+            0f,
+            buttonWidth,
+            heightSize.toFloat(),
+            paint
+        )
+
         paint.color = Color.WHITE
         // Draw text.
         canvas.drawText(
@@ -58,20 +72,56 @@ class LoadingButton @JvmOverloads constructor(
         )
 
         paint.color = ContextCompat.getColor(context, R.color.colorAccent)
-        canvas.drawCircle(widthSize / 1.4f, heightSize / 2f, circleRadius, paint)
+        canvas.drawArc(
+            widthSize - 345f, heightSize / 2 - 40f,
+            widthSize - 270f, heightSize / 2 + 40f,
+            0f, circleRadius, true, paint
+        )
+
+//        canvas.drawArc(
+//            widthSize/ 1.4f, heightSize / 1.95f ,
+//            widthSize/1.55f, heightSize / 2.10f,
+//            0f, circleRadius, true, paint
+//        )
         canvas.restore()
     }
 
+//    circleAnimator = ValueAnimator.ofFloat(0f, 360f).apply {
+//        val animDuration
+//        duration = animDuration
+//        repeatMode = ValueAnimator.REVERSE
+//        repeatCount = ValueAnimator.INFINITE
+//        interpolator = AccelerateInterpolator(1f)
+//        addUpdateListener {
+//            loadingAngle = animatedValue as Float
+//            invalidate()
+//        }
+//    }
+
+//    fun showLoading() {
+//
+//    }
 
     fun showLoading() {
-        //isVisible = true
-        valueAnimator = ValueAnimator.ofFloat(10F, circleRadius).apply {
-            duration = 1000
-            interpolator = AccelerateDecelerateInterpolator()
+        circleValueAnimator = ValueAnimator.ofFloat(0F, circleRadius).apply {
+            duration = animDuration
+            //interpolator = AccelerateDecelerateInterpolator()
+            interpolator = AccelerateInterpolator(1f)
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.RESTART
             addUpdateListener { animation ->
                 circleRadius = animation.animatedValue as Float
-                animation.repeatCount = ValueAnimator.INFINITE
-                animation.repeatMode = ValueAnimator.REVERSE
+                invalidate()
+            }
+            start()
+        }
+        buttonValueAnimator = ValueAnimator.ofFloat(0F, widthSize.toFloat()).apply {
+            duration = animDuration
+            interpolator = AccelerateInterpolator(1f)
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.RESTART
+            addUpdateListener {
+                buttonWidth = animatedValue as Float
                 invalidate()
             }
             start()

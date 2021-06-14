@@ -4,9 +4,7 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.AccelerateInterpolator
 import androidx.core.content.ContextCompat
 import kotlin.properties.Delegates
@@ -94,12 +92,6 @@ class LoadingButton @JvmOverloads constructor(
             widthSize - 170f, heightSize / 2 + 40f,
             0f, circleRadius, true, paint
         )
-
-//        canvas.drawArc(
-//            widthSize/ 1.4f, heightSize / 1.95f ,
-//            widthSize/1.55f, heightSize / 2.10f,
-//            0f, circleRadius, true, paint
-//        )
         canvas.restore()
     }
 

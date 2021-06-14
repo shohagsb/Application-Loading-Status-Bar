@@ -19,7 +19,7 @@ class LoadingButton @JvmOverloads constructor(
 
     private var circleRadius = 0f
     private var buttonWidth = 0f
-    val animDuration = 3000L
+    private val animDuration = 3000L
 
     private var buttonText = context.getString(R.string.button_name)
 
@@ -30,6 +30,8 @@ class LoadingButton @JvmOverloads constructor(
     var buttonState: ButtonState by Delegates.observable(ButtonState.Completed) { p, old, new ->
         when (new) {
             ButtonState.Loading -> {
+                cancelAnimation()
+                resetLoadingValue()
                 buttonText = context.getString(R.string.button_loading)
                 startAnimation()
             }

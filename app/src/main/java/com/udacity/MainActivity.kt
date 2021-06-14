@@ -77,6 +77,7 @@ class MainActivity : AppCompatActivity() {
                     downloadStatus = "Failed"
                 }
             }
+            cursor.close()
             downloadStatus?.let { status ->
                 notificationManager.sendNotification(
                     applicationContext.getString(R.string.notification_description),

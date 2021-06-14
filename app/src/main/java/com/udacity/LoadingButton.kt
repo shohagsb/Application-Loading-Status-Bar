@@ -19,6 +19,9 @@ class LoadingButton @JvmOverloads constructor(
     private var buttonWidth = 0f
     private val animDuration = 3000L
 
+    private var bgColor: Int
+    private var textColor: Int
+
     private var buttonText = context.getString(R.string.button_name)
 
     private var buttonValueAnimator = ValueAnimator()
@@ -55,21 +58,40 @@ class LoadingButton @JvmOverloads constructor(
 
     init {
         isClickable = true
+
+        context.theme.obtainStyledAttributes(
+            attrs,
+            R.styleable.LoadingButton,
+            defStyleAttr, 0
+        ).apply {
+
+            try {
+                bgColor = getColor(
+                    R.styleable.LoadingButton_backgroundColor,
+                    ContextCompat.getColor(context, R.color.colorPrimary)
+                )
+                textColor = getColor(
+                    R.styleable.LoadingButton_textColor,
+                    Color.WHITE)
+            } finally {
+                recycle()
+            }
+        }
     }
 
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        drawTranslatedTextExample(canvas)
+        drawButton(canvas)
 
     }
 
-    private fun drawTranslatedTextExample(canvas: Canvas) {
+    private fun drawButton(canvas: Canvas) {
         canvas.save()
         //Button Background
-        canvas.drawColor(ContextCompat.getColor(context, R.color.colorPrimary))
+        canvas.drawColor(bgColor)
         //Draw the Rectangle
-        paint.color = context.getColor(R.color.colorPrimaryDark)
+        paint.color = ContextCompat.getColor(context, R.color.colorPrimaryDark)
         canvas.drawRect(
             0f,
             0f,
@@ -79,7 +101,7 @@ class LoadingButton @JvmOverloads constructor(
         )
 
         // Draw text.
-        paint.color = Color.WHITE
+        paint.color = textColor
         canvas.drawText(
             buttonText,
             widthSize / 2f, heightSize / 2f + 18, paint
@@ -94,6 +116,7 @@ class LoadingButton @JvmOverloads constructor(
         )
         canvas.restore()
     }
+
 
     private fun startAnimation() {
         circleValueAnimator = ValueAnimator.ofFloat(0F, 360F).apply {

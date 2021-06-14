@@ -20,7 +20,7 @@ class DetailActivity : AppCompatActivity() {
         }
 
         ok_button.setOnClickListener {
-            finish()
+            onBackPressed()
         }
     }
 
